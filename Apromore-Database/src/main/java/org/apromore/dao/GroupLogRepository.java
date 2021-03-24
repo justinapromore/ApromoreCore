@@ -24,14 +24,13 @@
 
 package org.apromore.dao;
 
+import java.util.List;
+
 import org.apromore.dao.model.*;
 import org.apromore.dao.model.Process;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 /**
  * Data access for {@link Group}/{@link Process}  instance pairs.
@@ -58,6 +57,13 @@ public interface GroupLogRepository extends JpaRepository<GroupLog, Integer> {
     List<GroupLog> findByLogId(final Integer processId);
 
     /**
+     * @param groupId Id of Group
+     * @return all groups containing the group identified by <var>groupId</var>
+     */
+    @Query("SELECT gp FROM GroupLog gp WHERE (gp.group.id = ?1)")
+    List<GroupLog> findByGroupId(final Integer groupId);
+
+    /**
      * Search for processes to which a particular user has access
      *
      * @param userRowGuid the rowGuid of a user
@@ -65,7 +71,7 @@ public interface GroupLogRepository extends JpaRepository<GroupLog, Integer> {
      */
     @Query("SELECT gp FROM GroupLog gp JOIN gp.log p JOIN gp.group g1, " +
            "               User u JOIN u.groups g2 " +
-           "WHERE (p.folder IS NULL) AND (u.rowGuid = ?1) AND (g1 = g2)")
+	    "WHERE (p.folder IS NULL) AND (u.rowGuid = ?1) AND (g1 = g2)")
     List<GroupLog> findLogsByUser(String userRowGuid);
 
     /**
@@ -87,4 +93,11 @@ public interface GroupLogRepository extends JpaRepository<GroupLog, Integer> {
            "               User u JOIN u.groups g2 " +
            "WHERE (gp.log.id = ?1) AND (u.rowGuid = ?2) AND (g1 = g2)")
     List<GroupLog> findByLogAndUser(final Integer logId, final String userRowGuid);
+
+    /**
+     * Return a list of GroupLog that are OWNER of specified log.
+     */
+    @Query("SELECT gf FROM GroupLog gf WHERE (gf.log.id = ?1) AND (gf.accessRights.ownerShip = 1)")
+    List<GroupLog> findOwnerByLogId(final Integer logId);
+
 }

@@ -26,14 +26,16 @@
     <bundle>mvn:org.modelmapper/modelmapper/2.3.0</bundle>
     <bundle>mvn:org.apromore/apromore-commons/1.0</bundle>
     <bundle>mvn:org.apromore/apromore-calendar/1.0</bundle>
+    <bundle>mvn:org.apromore/calendar-portal-plugin/1.0</bundle>
   </feature>
 
   <feature name="apromore-common" version="${project.version}" description="Apromore common to all editions">
     <feature>apromore-portal</feature>
+    <feature>jaxb</feature>
     <bundle>mvn:commons-beanutils/commons-beanutils/1.9.3</bundle>
     <bundle>mvn:commons-collections/commons-collections/3.2.2</bundle>
     <bundle>mvn:org.apache.commons/commons-collections4/4.4</bundle>
-    <bundle>mvn:org.apache.commons/commons-lang3/3.6</bundle>
+    <bundle>mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
     <bundle>mvn:org.apache.commons/commons-math3/3.6</bundle>
     <bundle>mvn:org.apache.commons/commons-text/1.1</bundle>
     <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.joda-time/2.3_1</bundle>
@@ -44,7 +46,10 @@
     <bundle>mvn:org.apromore/prom-bpmn-osgi/1.0</bundle>
     <bundle>mvn:org.apromore/prom-models-osgi/1.0</bundle>
     <bundle>mvn:org.apromore/prom-widgets-osgi/1.0</bundle>
-
+    <bundle>mvn:com.github.dozermapper/dozer-core/6.5.0</bundle>
+    <bundle>mvn:org.objenesis/objenesis/2.6</bundle>
+        
+    <bundle>mvn:org.json/json/${json.version}</bundle>
     <feature>apromore-bpmn-editor</feature>
     <bundle>mvn:org.apromore/csvexporter-logic/1.0</bundle>
     <bundle>mvn:org.apromore/csvexporter-portal-plugin/1.0</bundle>
@@ -57,6 +62,7 @@
     <bundle>mvn:org.apromore/similaritysearch-osgi/1.1</bundle>
     <bundle>mvn:org.apromore/similaritysearch-portal/1.1.0</bundle>
     <bundle>mvn:org.apromore/splitminer-logic/1.0</bundle>
+    <bundle>mvn:org.apromore/access-control-portal-plugin/1.0</bundle>
     <bundle>mvn:org.apromore/user-admin-portal-plugin/1.0</bundle>
     <bundle>mvn:org.apromore.plugin/about-portal-plugin/1.0</bundle>
     <bundle>mvn:org.apromore.plugin/account-portal-plugin/1.0</bundle>
@@ -66,9 +72,6 @@
     <bundle>mvn:org.apromore.plugin/log-animation-portal-plugin-api/1.0.0</bundle>
     <bundle>mvn:org.apromore.plugin/merge-portal/1.1</bundle>
     <bundle>mvn:org.apromore.plugin/portal-custom-gui/1.1.0</bundle>
-    <bundle>mvn:org.json/json-osgi/1.0</bundle>
-
-    <feature>apromore-rest-endpoint</feature>
   </feature>
 
   <feature name="apromore-core" version="${project.version}" description="Apromore core edition">
@@ -93,7 +96,7 @@
     <feature>eclipselink</feature>
     <feature>liquibase-core</feature>
     <feature>virgo-compatibility</feature>
-    <bundle>mvn:com.google.guava/guava/14.0.1</bundle>
+    <bundle>mvn:com.google.guava/guava/${google.guava.version}</bundle>
     <bundle>mvn:com.h2database/h2/1.3.171</bundle>
     <bundle>mvn:mysql/mysql-connector-java/5.1.31</bundle>
     <bundle>mvn:mysql/mysql-connector-java/8.0.22</bundle>
@@ -108,12 +111,10 @@
     <feature version="${virgo.spring.version}">spring-security</feature>
     <feature>apromore-database</feature>
     <feature>openxes</feature>
-    <bundle>mvn:commons-io/commons-io/2.6</bundle>
-    <bundle>mvn:commons-lang/commons-lang/2.6</bundle>
-    <bundle>mvn:javax.wsdl/com.springsource.javax.wsdl/1.6.1</bundle>
+    <bundle>mvn:commons-io/commons-io/${commons.io.version}</bundle>
+    <bundle>mvn:commons-lang/commons-lang/${commons.lang.version}</bundle>
     <bundle>mvn:org.apache.commons/commons-math3/3.6</bundle>
     <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ehcache/2.6.11_1</bundle>
-    <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jaxb-impl/2.2.11_1</bundle>
     <bundle>mvn:org.apromore/apmlog/1.0.0</bundle>
     <bundle>mvn:org.apromore/apromore-cache/1.0</bundle>
     <bundle>mvn:org.apromore/apromore-storage/1.0</bundle>
@@ -122,21 +123,7 @@
     <bundle>mvn:org.apromore.plugin/event-log-plugin-api/1.1</bundle>
     <bundle>mvn:org.apromore.plugin/plugin-api/1.1</bundle>
     <bundle>mvn:org.apromore.plugin/plugin-api-provider/1.1</bundle>
-    <bundle>mvn:org.springframework.ws/org.springframework.ws/2.1.0.RELEASE</bundle>
-    <bundle>mvn:org.springframework.ws/org.springframework.xml/2.1.0.RELEASE</bundle>
     <bundle>mvn:org.apromore/apromore-manager/1.1</bundle>
-  </feature>
-
-  <feature name="apromore-rest-endpoint" version="${project.version}" description="Apromore REST endpoint">
-    <feature>apromore-portal</feature>
-    <bundle>mvn:javax.ws.rs/jsr311-api/1.1.1</bundle>
-    <bundle>mvn:org.codehaus.jackson/jackson-core-lgpl/${jackson.version}</bundle>
-    <bundle>mvn:org.codehaus.jackson/jackson-jaxrs/${jackson.version}</bundle>
-    <bundle>mvn:org.codehaus.jackson/jackson-mapper-lgpl/${jackson.version}</bundle>
-    <bundle>mvn:org.codehaus.jackson/jackson-xc/${jackson.version}</bundle>
-    <bundle>mvn:org.codehaus.jettison/jettison/1.4.1</bundle>
-    <bundle>mvn:org.apromore/jersey-osgi/1.0</bundle>
-    <bundle>mvn:org.apromore/rest-endpoint/1.0/war</bundle>
   </feature>
 
   <feature name="apromore-portal" version="${project.version}" description="Apromore core web browser interface">
@@ -145,7 +132,7 @@
     <feature>jms</feature>
     <feature>war</feature>
     <requirement>osgi.wiring.package; filter:="(&amp;(osgi.wiring.package=org.zkoss.zul)(version>=8.6.0)(!(version>=10.0.0)))"</requirement>
-    <bundle>mvn:com.google.guava/guava/20.0</bundle>
+    <bundle>mvn:com.google.guava/guava/${google.guava.version}</bundle>
     <bundle>mvn:javax.validation/com.springsource.javax.validation/1.0.0.GA</bundle>
     <bundle>mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.saaj-api-1.3/2.9.0</bundle>
     <bundle>mvn:org.apromore/manager-client/1.1</bundle>
@@ -157,7 +144,6 @@
     <bundle>mvn:org.igniterealtime/com.springsource.org.jivesoftware.smackx/3.1.0</bundle>
     <bundle>mvn:org.springframework/spring-jms/${virgo.spring.version}</bundle>
     <bundle>mvn:org.springframework.security/org.springframework.security.remoting/${virgo.spring.version}</bundle>
-    <bundle>mvn:org.springframework.ws/org.springframework.ws.support/2.1.0.RELEASE</bundle>
     <!-- <bundle>webbundle:mvn:org.apromore/apromore-portal/1.1/war?Web-ContextPath=</bundle> -->
     <bundle>mvn:org.apromore/apromore-portal/1.1/war</bundle>
   </feature>
@@ -186,7 +172,7 @@
     <bundle>mvn:com.google.code.findbugs/jsr305/3.0.2</bundle>
     <bundle>mvn:com.google.code.gson/gson/2.7</bundle>
     <bundle>mvn:com.google.guava/failureaccess/1.0.1</bundle>
-    <bundle>mvn:com.google.guava/guava/27.1-jre</bundle>
+    <bundle>mvn:com.google.guava/guava/${google.guava.version}</bundle>
     <bundle>mvn:commons-beanutils/commons-beanutils/1.9.3</bundle>
     <bundle>mvn:commons-collections/commons-collections/3.2.2</bundle>
     <bundle>mvn:org.apache.ant/com.springsource.org.apache.tools.ant/1.8.3</bundle>
@@ -197,8 +183,13 @@
     <bundle>mvn:org.apromore/parquet-osgi/1.0</bundle>
   </feature>
 
+  <feature name="jaxb" version="2.3">  <!-- JAXB 2.3, including com.sun.xml.bind.* packages -->
+    <bundle>mvn:javax.xml.bind/jaxb-api/2.3.1</bundle>
+    <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jaxb-runtime/2.3.2_2</bundle>
+  </feature>
+
   <feature name="opencsv">
-    <bundle>mvn:org.apache.commons/commons-lang3/3.6</bundle>
+    <bundle>mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
     <bundle>mvn:org.apache.commons/commons-text/1.1</bundle>
     <bundle>mvn:com.opencsv/opencsv/4.0</bundle>
     <bundle>mvn:org.ow2.bundles/ow2-bundles-externals-opencsv/1.0.36</bundle>
@@ -208,12 +199,13 @@
     <bundle>mvn:com.esotericsoftware/kryo/4.0.2</bundle>
     <bundle>mvn:com.esotericsoftware/minlog/1.3.0</bundle>
     <bundle>mvn:com.esotericsoftware/reflectasm/1.11.3</bundle>
-    <bundle>mvn:com.google.guava/guava/16.0.1</bundle>
-    <bundle>mvn:com.thoughtworks.xstream/xstream/1.4.15</bundle>
+    <bundle>mvn:com.google.guava/guava/${google.guava.version}</bundle>
+    <bundle>mvn:com.thoughtworks.xstream/xstream/${xstream.version}</bundle>
+    <bundle>mvn:io.github.x-stream/mxparser/1.2.1</bundle>
     <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xpp3/1.1.4c_7</bundle>
     <bundle>mvn:org.apromore/eclipse-collections-osgi/1.1</bundle>
     <bundle>mvn:org.apromore/log-osgi/1.1</bundle>
-    <bundle>mvn:org.objenesis/objenesis/2.5.1</bundle>
+    <bundle>mvn:org.objenesis/objenesis/2.6</bundle>
     <bundle>mvn:org.ow2.asm/asm/5.0.4</bundle>
   </feature>
 
@@ -232,15 +224,14 @@
     <feature version="${virgo.spring.version}">spring-orm</feature>
     <feature version="${virgo.spring.version}">spring-web</feature>  <!-- install before spring-dm-web, otherwise Spring 3.2 will be installed -->
     <feature>spring-dm-web</feature>
-    <bundle>mvn:org.apromore/virgo-compatibility/1.0</bundle>
   </feature>
 
   <feature name="zk-framework" version="${project.version}" description="ZK framework">
     <feature>http</feature>
-    <bundle>mvn:com.google.guava/guava/20.0</bundle>
-    <bundle>mvn:commons-codec/commons-codec/1.14</bundle>
-    <bundle>mvn:commons-io/commons-io/2.6</bundle>
-    <bundle>mvn:commons-fileupload/commons-fileupload/1.4</bundle>
+    <bundle>mvn:com.google.guava/guava/${google.guava.version}</bundle>
+    <bundle>mvn:commons-codec/commons-codec/${commons.codec.version}</bundle>
+    <bundle>mvn:commons-io/commons-io/${commons.io.version}</bundle>
+    <bundle>mvn:commons-fileupload/commons-fileupload/${commons.fileupload.version}</bundle>
     <bundle>mvn:javax.portlet/portlet-api/3.0.1</bundle>
     <bundle>mvn:javax.websocket/javax.websocket-api/1.1</bundle>
     <bundle>mvn:org.javassist/javassist/3.26.0-GA</bundle>

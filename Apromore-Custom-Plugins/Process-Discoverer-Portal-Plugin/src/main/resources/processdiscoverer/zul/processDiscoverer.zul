@@ -21,7 +21,7 @@
   -->
 
 <?component name="menuitem" extends="menuitem" autocheck="true" checkmark="true" ?>
-<?page id="ap-pd2" title="Apromore - Process Discoverer" contentType="text/html;charset=UTF-8" ?>
+<?page id="ap-pd2" title="${labels.brand.shortName} - Process Discoverer" contentType="text/html;charset=UTF-8" ?>
 <?component name="viewSettings" macroURI="components/viewSettings.zul" ?>
 <?component name="graphSettings" macroURI="components/graphSettings.zul" ?>
 <?component name="logStats" macroURI="components/logStats.zul" ?>
@@ -204,6 +204,8 @@
         <button ca:data-t="filter-clear" id="filterClear" disabled="true" tooltiptext="Clear all filter" sclass="ap-icon ap-icon-filter-delete"/>
         <n:span class="ap-action-sep"></n:span>
         <button ca:data-t="animate" id="animate" tooltiptext="Animate" sclass="ap-icon ap-icon-play-circle"/>
+        <h:span class="ap-action-sep"></h:span>
+        <button id="share" sclass="ap-icon ap-icon-share" ca:data-t="share" tooltiptext="Share file or folder"/>
       </div>
       <div hflex="1" align="right">
         <!-- Exact single search -->

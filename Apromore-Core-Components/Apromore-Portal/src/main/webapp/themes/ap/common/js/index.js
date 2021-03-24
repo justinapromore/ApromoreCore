@@ -51,8 +51,8 @@ Ap.common.notify = (message, type) => {
   const FADE_IN_MS = 400;
   const FADE_OUT_MS = 3000;
   type = type || 'error';
-  let notification = $(`<div class="ap-notification ap-notification-${type}">${message}</div>`);
-  let close = $('<span class="ap-notification-close"></span>');
+  let notification = jQuery(`<div class="ap-notification ap-notification-${type}">${message}</div>`);
+  let close = jQuery('<span class="ap-notification-close"></span>');
   close.appendTo(notification);
   close.click(() => {
     try {
@@ -104,4 +104,13 @@ Ap.common.pullClientTimeZone = function () {
   setTimeout(function () {
     zAu.send(new zk.Event(zk.Widget.$('$setTimeZone'), 'onClientUpdate', { offset, tz } ));
   }, 200);
+}
+
+/**
+ * Inject additional global class to body
+ *
+ * @param klass {String} An additional CSS class
+ */
+Ap.common.injectGlobalClass = function (klass) {
+    jQuery('body')[0].classList.add(klass);
 }

@@ -24,50 +24,43 @@
 
 package org.apromore.portal.dialogController;
 
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Objects;
+import java.util.Set;
 
-import javax.xml.datatype.DatatypeFactory;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.ValidationException;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 
-import org.apromore.dao.model.Group;
 import org.apromore.dao.model.User;
 import org.apromore.plugin.portal.PortalContext;
 import org.apromore.plugin.portal.PortalPlugin;
-import org.apromore.portal.common.notification.Notification;
-import org.apromore.portal.access.Helpers;
+import org.apromore.portal.common.Constants;
+import org.apromore.portal.common.ItemHelpers;
 import org.apromore.portal.common.UserSessionManager;
+import org.apromore.portal.common.notification.Notification;
 import org.apromore.portal.context.PluginPortalContext;
 import org.apromore.portal.context.PortalPluginResolver;
 import org.apromore.portal.dialogController.workspaceOptions.AddFolderController;
-import org.apromore.portal.dialogController.workspaceOptions.RenameFolderController;
 import org.apromore.portal.dialogController.workspaceOptions.CopyAndPasteController;
+import org.apromore.portal.dialogController.workspaceOptions.RenameFolderController;
 import org.apromore.portal.exception.DialogException;
-import org.apromore.portal.model.ExportFormatResultType;
 import org.apromore.portal.model.FolderType;
-import org.apromore.portal.model.ImportProcessResultType;
 import org.apromore.portal.model.LogSummaryType;
 import org.apromore.portal.model.ProcessSummaryType;
 import org.apromore.portal.model.SummariesType;
 import org.apromore.portal.model.SummaryType;
 import org.apromore.portal.model.UserType;
 import org.apromore.portal.model.VersionSummaryType;
-import org.apromore.util.AccessType;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zk.ui.event.EventQueue;
+import org.zkoss.zk.ui.event.EventQueues;
 import org.zkoss.zk.ui.event.KeyEvent;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Button;
@@ -77,7 +70,6 @@ import org.zkoss.zul.Listhead;
 import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Paging;
-import org.zkoss.zul.Window;
 
 public abstract class BaseListboxController extends BaseController {
 
@@ -158,7 +150,6 @@ public abstract class BaseListboxController extends BaseController {
 		btnUserMgmt = (Button) mainController.getFellow("btnUserMgmt");
 		btnShare = (Button) mainController.getFellow("btnShare");
 		btnCalendar = (Button) mainController.getFellow("btnCalendar");
-		btnCalendar.setVisible(config.getEnableCalendar());
 
 		attachEvents();
 
@@ -175,6 +166,10 @@ public abstract class BaseListboxController extends BaseController {
 		} catch (Exception e) {
 			Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
 		}
+	}
+
+	public User getCurrentUser() {
+		return currentUser;
 	}
 
 	public void setPersistedView(String view) {
@@ -342,7 +337,18 @@ public abstract class BaseListboxController extends BaseController {
 		this.btnCalendar.addEventListener("onClick", new EventListener<Event>() {
 			@Override
 			public void onEvent(Event event) throws Exception {
-				launchCalendar();
+
+			Set<Object> selections = getSelection();
+
+			if (selections.size() != 1
+				|| !selections.iterator().next().getClass().equals(LogSummaryType.class)) {
+			    Notification.error("Please select a log file");
+			    return;
+			}
+
+			LogSummaryType selectedItem = (LogSummaryType) selections.iterator().next();
+			launchCalendar(selectedItem.getName(), selectedItem.getId());
+
 			}
 		});
 	}
@@ -404,19 +410,19 @@ public abstract class BaseListboxController extends BaseController {
 
 	    boolean canChange = currentFolder == null || currentFolder.getId() == 0 ? true : false;
 	    try {
-		canChange = canChange || Helpers.isChangeable(currentFolder, currentUser);;
+			canChange = canChange || ItemHelpers.canModify(currentUser, currentFolder);;
 	    } catch (Exception e) {
-		Notification.error(e.getMessage());
-		return;
+			Notification.error(e.getMessage());
+			return;
 	    }
 	    if (canChange) {
-		try {
-		    new ImportController(getMainController());
-		} catch (DialogException e) {
-		    Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
-		}
+			try {
+				new ImportController(getMainController());
+			} catch (DialogException e) {
+				Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
+			}
 	    } else {
-		Notification.error("Cannot upload in readonly folder");
+			Notification.error("Cannot upload in readonly folder");
 	    }
 	}
 
@@ -432,9 +438,10 @@ public abstract class BaseListboxController extends BaseController {
 	}
 
 	protected void addFolder() throws InterruptedException {
+		FolderType currentFolder = getMainController().getPortalSession().getCurrentFolder();
 		getMainController().eraseMessage();
 		try {
-			new AddFolderController(getMainController());
+			new AddFolderController(getMainController(), currentUser, currentFolder);
 		} catch (DialogException e) {
 			Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
 		}
@@ -494,7 +501,7 @@ public abstract class BaseListboxController extends BaseController {
 
 			boolean canChange = false;
 			try {
-				canChange = Helpers.isChangeable(selectedItem, currentUser);
+				canChange = ItemHelpers.canModify(currentUser, selectedItem);
 			} catch (Exception e) {
 				Notification.error(e.getMessage());
 				return;
@@ -512,46 +519,6 @@ public abstract class BaseListboxController extends BaseController {
             }
 
 		} catch (DialogException e) {
-			Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
-		}
-	}
-
-	/**
-	 * Share folder/log/process model
-	 */
-	protected void share() {
-		try {
-			if (getSelectionCount() == 0) {
-				Notification.error("Please select a log or model to share");
-				return;
-			} else if (getSelectionCount() > 1) {
-				Notification.error("You cannot share multiple items");
-				return;
-			}
-			Object selectedItem = getSelection().iterator().next();
-			boolean canShare = false;
-			// canShare = validateNotFolderTypeItem(selectedItem); // Allow folder
-			try {
-				canShare = Helpers.isShareable(selectedItem, currentUser);
-			} catch (ValidationException e) {
-				Notification.error(e.getMessage());
-				return;
-			}
-			if (canShare) {
-				Map arg = new HashMap<>();
-				arg.put("selectedItem", selectedItem);
-				arg.put("currentUser", UserSessionManager.getCurrentUser());
-				arg.put("autoInherit", true);
-				arg.put("showRelatedArtifacts", true);
-				arg.put("enablePublish", config.getEnablePublish());
-				Window window = (Window) Executions.getCurrent().createComponents("components/access/share.zul", null, arg);
-				window.doModal();
-			} else {
-				Notification.error("Only Owner can share an item");
-				return;
-			}
-			;
-		} catch (Exception e) {
 			Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
@@ -592,48 +559,19 @@ public abstract class BaseListboxController extends BaseController {
 	public void cut() {
 		FolderType currentFolder = getMainController().getPortalSession().getCurrentFolder();
 
-		boolean canChange = currentFolder == null || currentFolder.getId() == 0;
-		try {
-			canChange = canChange || Helpers.isChangeable(currentFolder, currentUser);
-		} catch (Exception e) {
-			Notification.error(e.getMessage());
-			return;
-		}
-
-		if (canChange) {
-			copyAndPasteController.cut(getSelection(), getSelectionCount());
-		} else {
-			Notification.error("Only Owner or Editor can cut from here.");
-		}
+		copyAndPasteController.cut(getSelection(), getSelectionCount(), currentFolder);
 	}
 
 	public void copy() {
-		copyAndPasteController.copy(getSelection(), getSelectionCount());
+		FolderType currentFolder = getMainController().getPortalSession().getCurrentFolder();
+
+		copyAndPasteController.copy(getSelection(), getSelectionCount(), currentFolder);
 	}
 
 	public void paste() throws Exception {
-		// FolderType currentFolder = UserSessionManager.getCurrentFolder();
 		FolderType currentFolder = getMainController().getPortalSession().getCurrentFolder();
 
-		boolean canChange = currentFolder == null || currentFolder.getId() == 0;
-		try {
-			canChange = canChange || Helpers.isChangeable(currentFolder, currentUser);
-		} catch (Exception e) {
-			Notification.error(e.getMessage());
-			return;
-		}
-
-		if (canChange) {
-			Integer targetFolderId = currentFolder == null ? 0 : currentFolder.getId();
-			try {
-				copyAndPasteController.paste(targetFolderId);
-			} catch (Exception e) {
-				Messagebox.show("An error is occured during paste process", "Apromore", Messagebox.OK,
-						Messagebox.ERROR);
-			}
-		} else {
-			Notification.error("Only Owner or Editor can paste here.");
-		}
+		copyAndPasteController.paste(currentFolder);
 		refreshContent();
 	}
 
@@ -782,30 +720,12 @@ public abstract class BaseListboxController extends BaseController {
 				});
 	}
 
-	/* Setup the Security controller. */
-	protected void security() throws InterruptedException {
-		Object selectedItem;
-		getMainController().eraseMessage();
-		try {
-			boolean canShare = false;
-			if (getSelectionCount() == 0 || getSelectionCount() > 1) {
-				selectedItem = null;
-			} else {
-				selectedItem = getSelection().iterator().next();
-				canShare = Helpers.isShareable(selectedItem, currentUser);
-			}
-			new SecuritySetupController(getMainController(), UserSessionManager.getCurrentUser(), selectedItem, canShare);
-		} catch (Exception e) {
-			Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
-		}
-	}
-
 	protected void userMgmt() throws InterruptedException {
 		PortalPlugin userMgmtPlugin;
 
 		getMainController().eraseMessage();
 		try {
-			userMgmtPlugin = portalPluginMap.get("Manage user permissions");
+			userMgmtPlugin = portalPluginMap.get(Constants.USER_ADMIN_PLUGIN);
 			userMgmtPlugin.execute(portalContext);
 		} catch (Exception e) {
 			LOGGER.error("Unable to create user administration dialog", e);
@@ -813,17 +733,95 @@ public abstract class BaseListboxController extends BaseController {
 		}
 	}
 
-	protected void launchCalendar() {
-		PortalPlugin calendarPlugin;
+	/* Setup the Security controller. */
+	protected void security() throws InterruptedException {
+		PortalPlugin accessControlPlugin;
+		Object selectedItem;
 
 		getMainController().eraseMessage();
 		try {
-			calendarPlugin = portalPluginMap.get("Manage calendars");
-			calendarPlugin.execute(portalContext);
+			if (getSelectionCount() == 0 || getSelectionCount() > 1) {
+				selectedItem = null;
+			} else {
+				selectedItem = getSelection().iterator().next();
+			}
+			accessControlPlugin = portalPluginMap.get(Constants.ACCESS_CONTROL_PLUGIN);
+			Map arg = new HashMap<>();
+			arg.put("withFolderTree", true);
+			arg.put("selectedItem", selectedItem);
+			arg.put("currentUser", UserSessionManager.getCurrentUser()); // UserType
+			arg.put("autoInherit", true);
+			arg.put("showRelatedArtifacts", true);
+			arg.put("enablePublish", config.getEnablePublish());
+			accessControlPlugin.setSimpleParams(arg);
+			accessControlPlugin.execute(portalContext);
 		} catch (Exception e) {
-			LOGGER.error("Unable to create custom calendar dialog", e);
-			Messagebox.show("Unable to create custom calendar dialog");
+			Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
 		}
+	}
+
+	/**
+	 * Share folder/log/process model
+	 */
+	protected void share() {
+		PortalPlugin accessControlPlugin;
+
+		getMainController().eraseMessage();
+		// Check for ownership is moved to plugin level
+		try {
+			if (getSelectionCount() == 0) {
+				Notification.error("Please select a log or model to share");
+				return;
+			} else if (getSelectionCount() > 1) {
+				Notification.error("You cannot share multiple items");
+				return;
+			}
+			Object selectedItem = getSelection().iterator().next();
+			accessControlPlugin = portalPluginMap.get("ACCESS_CONTROL_PLUGIN");
+			Map arg = new HashMap<>();
+			arg.put("withFolderTree", false);
+			arg.put("selectedItem", selectedItem);
+			arg.put("currentUser", UserSessionManager.getCurrentUser()); // UserType
+			arg.put("autoInherit", true);
+			arg.put("showRelatedArtifacts", true);
+			arg.put("enablePublish", config.getEnablePublish());
+			accessControlPlugin.setSimpleParams(arg);
+			accessControlPlugin.execute(portalContext);
+		} catch (Exception e) {
+			Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
+		}
+	}
+
+	protected void launchCalendar(String artifactName, Integer logId) {
+	    PortalPlugin calendarPlugin;
+	    getMainController().eraseMessage();
+
+	    EventQueue<Event> queue = EventQueues.lookup("org/apromore/service/CALENDAR", true);
+	    
+	    Long calendarId = getMainController().getEventLogService().getCalendarIdFromLog(logId);
+
+	    queue.subscribe(new EventListener<Event>() {
+		@Override
+		public void onEvent(Event event) {
+		    Long data = (Long) event.getData();
+		    getMainController().getEventLogService().updateCalendarForLog(logId, data);
+
+		}
+	    });
+
+	    try {
+		Map<String, Object> attrMap = new HashMap<String, Object>();
+		attrMap.put("portalContext", portalContext);
+		attrMap.put("artifactName", artifactName);
+		attrMap.put("calendarId", calendarId);
+		calendarPlugin = portalPluginMap.get("Manage calendars");
+		calendarPlugin.setSimpleParams(attrMap);
+		calendarPlugin.execute(portalContext);
+
+	    } catch (Exception e) {
+		LOGGER.error("Unable to create custom calendar dialog", e);
+		Messagebox.show("Unable to create custom calendar dialog");
+	    }
 	}
 
 	/*

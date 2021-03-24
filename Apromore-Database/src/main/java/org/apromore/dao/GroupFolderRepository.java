@@ -24,15 +24,14 @@
 
 package org.apromore.dao;
 
+import java.util.List;
+
 import org.apromore.dao.model.Folder;
 import org.apromore.dao.model.Group;
 import org.apromore.dao.model.GroupFolder;
-import org.apromore.dao.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 /**
  * Interface domain model Data access object GroupFolder.
@@ -59,6 +58,13 @@ public interface GroupFolderRepository extends JpaRepository<GroupFolder, Intege
     List<GroupFolder> findByFolderId(final Integer folderId);
 
     /**
+     * @param groupId Id of Group
+     * @return all groups containing the group identified by <var>groupId</var>
+     */
+    @Query("SELECT gf FROM GroupFolder gf WHERE (gf.group.id = ?1)")
+    List<GroupFolder> findByGroupId(final Integer groupId);
+
+    /**
      * Returns a list of Folder Users for the folder and user combination.
      *
      * @param parentFolderId the parent folder Id
@@ -77,4 +83,11 @@ public interface GroupFolderRepository extends JpaRepository<GroupFolder, Intege
            "               User u JOIN u.groups g2 " +
            "WHERE (gf.folder.id = ?1) AND (u.rowGuid = ?2) AND (g1 = g2)")
     List<GroupFolder> findByFolderAndUser(final Integer folderId, final String userRowGuid);
+
+    /**
+     * Return a list of GroupFolder that are OWNER of specified folder.
+     */
+    @Query("SELECT gf FROM GroupFolder gf WHERE (gf.folder.id = ?1) AND (gf.accessRights.ownerShip = 1)")
+    List<GroupFolder> findOwnerByFolderId(final Integer folderId);
+
 }

@@ -25,10 +25,15 @@
 package org.apromore.service;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
-import org.apromore.dao.model.*;
+import org.apromore.dao.model.Folder;
+import org.apromore.dao.model.GroupFolder;
+import org.apromore.dao.model.GroupLog;
+import org.apromore.dao.model.GroupProcess;
+import org.apromore.dao.model.Log;
 import org.apromore.dao.model.Process;
+import org.apromore.dao.model.User;
 import org.apromore.exception.NotAuthorizedException;
 import org.apromore.exception.UserNotFoundException;
 import org.apromore.service.model.FolderTreeNode;
@@ -67,15 +72,15 @@ public interface WorkspaceService {
 
     Page<Log> getLogs(String userId, Integer folderId, Pageable pageable);
 
-    void createFolder(String userId, String folderName, Integer parentFolderId, Boolean isGEDMatrixReady);
+    Integer createFolder(String userId, String folderName, Integer parentFolderId, Boolean isGEDMatrixReady);
 
-    void addProcessToFolder(Integer processId, Integer folderId);
+    void addProcessToFolder(User user, Integer processId, Integer folderId);
 
     boolean isGEDReadyFolder(Integer folderId);
 
     void updateFolder(Integer folderId, String folderName, Boolean isGEDMatrixReady, User user) throws NotAuthorizedException;
 
-    void deleteFolder(Integer folderId, User user) throws NotAuthorizedException;
+    void deleteFolder(Integer folderId, User user) throws Exception;
 
     List<FolderTreeNode> getWorkspaceFolderTree(String userId);
 
@@ -160,7 +165,7 @@ public interface WorkspaceService {
      * @throws Exception
      */
     Process moveProcess(Integer processId, Integer newFolderId) throws Exception;
-    
+
     /**
      * Copy a folder to a new parent folder; all subfolders and items are copied recursively
      * @param folderId
@@ -180,6 +185,57 @@ public interface WorkspaceService {
      */
     Folder moveFolder(Integer folderId, Integer newParentFolderId) throws Exception;
 
+    /**
+     *
+     * Get a list of Folders that the specified user's singleton group is the only owner of
+     * Note: Only considering singleton group here
+     *
+     * @param user User
+     * @return Return a list of Folders that the specified user's singleton group is the only owner of
+     */
+    List<Folder> getSingleOwnerFolderByUser(User user);
 
+    /**
+     *
+     * Get a list of Logs that the specified user's singleton group is the only owner of
+     * Note: Only considering singleton group here
+     *
+     * @param user User
+     * @return Return a list of Logs that the specified user's singleton group is the only owner of
+     */
+    List<Log> getSingleOwnerLogByUser(User user);
+
+    /**
+     *
+     * Get a list of Processes that the specified user's singleton group is the only owner of
+     * Note: Only considering singleton group here
+     *
+     * @param user User
+     * @return Return a list of Processes that the specified user's singleton group is the only owner of
+     */
+    List<Process> getSingleOwnerProcessByUser(User user);
+
+    /**
+     * Whether the specified user is the only owner of any folder, log or process
+     *
+     * @param user User to be checked
+     * @return Whether the specified user is the only owner of any folder, log or process
+     */
+    Boolean isOnlyOwner(User user);
+
+    /**
+     * Transfer the ownership of all the folder, log and process that the user-to-be-deleted is the only owner of
+     *
+     * @param sourceUser User to be deleted
+     * @param targetUser User to transfer ownership to
+     */
+    void transferOwnership(User sourceUser, User targetUser);
+
+    /**
+     * Remove all the folder, log and process that the user-to-be-deleted is the only owner of
+     *
+     * @param user user to be deleted
+     */
+    void deleteOwnerlessArtifact(User user);
 
 }

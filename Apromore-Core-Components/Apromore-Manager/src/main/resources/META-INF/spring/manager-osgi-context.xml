@@ -61,6 +61,7 @@
 	<osgi:reference id="processModelVersionRepository" interface="org.apromore.dao.ProcessModelVersionRepository"/>
      
     <osgi:reference id="folderRepository" interface="org.apromore.dao.FolderRepository"/>
+    <osgi:reference id="folderInfoRepository" interface="org.apromore.dao.FolderInfoRepository"/>
     <osgi:reference id="groupFolderRepository.java" interface="org.apromore.dao.GroupFolderRepository"/>
     <osgi:reference id="groupLogRepository" interface="org.apromore.dao.GroupLogRepository"/>
     <osgi:reference id="groupProcessRepository" interface="org.apromore.dao.GroupProcessRepository"/>
@@ -76,6 +77,7 @@
     <osgi:reference id="nativeTypeRepository" interface="org.apromore.dao.NativeTypeRepository"/>
     <osgi:reference id="permissionRepository" interface="org.apromore.dao.PermissionRepository"/>
     <osgi:reference id="processBranchRepository" interface="org.apromore.dao.ProcessBranchRepository"/>
+    <osgi:reference id="customCalendarRepository" interface="org.apromore.dao.CustomCalendarRepository"/>    
     
     <osgi:reference id="processModelAttributeRepository" interface="org.apromore.dao.ProcessModelAttributeRepository"/>
     <osgi:reference id="processModelVersionRepository" interface="org.apromore.dao.ProcessModelVersionRepository"/>
