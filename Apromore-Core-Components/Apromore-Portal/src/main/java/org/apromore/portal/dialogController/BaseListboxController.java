@@ -56,6 +56,7 @@ import org.apromore.portal.model.SummaryType;
 import org.apromore.portal.model.UserType;
 import org.apromore.portal.model.VersionSummaryType;
 import org.slf4j.Logger;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -77,12 +78,7 @@ public abstract class BaseListboxController extends BaseController {
 	private static final long serialVersionUID = -4693075788311730404L;
 	private static final Logger LOGGER = PortalLoggerFactory.getLogger(BaseListboxController.class);
 
-	private static final String ALERT = "Alert";
 	private static final String ETL_PLUGIN_LABEL = "Create data pipeline";
-	private static final String FOLDER_DELETE = "Are you sure you want to delete selected folder(s) and all it's contents?";
-	private static final String LOG_DELETE = "Are you sure you want to delete selected log(s)?";
-	private static final String PROCESS_DELETE = "Are you sure you want to delete the selected process model(s)? If no version has been selected, the latest version will be removed.";
-	private static final String MIXED_DELETE = "Are you sure you want to delete the selected file(s)? For a process model, if no version has been selected, the latest version will be removed.";
 
 	private static final String TILE_VIEW = "tile";
 	private static final String LIST_VIEW = "list";
@@ -172,7 +168,7 @@ public abstract class BaseListboxController extends BaseController {
 		try {
 			currentUser = getSecurityService().getUserById(UserSessionManager.getCurrentUser().getId());
 		} catch (Exception e) {
-			Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
+			Messagebox.show(e.getMessage(), "Apromore", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
 
@@ -362,7 +358,7 @@ public abstract class BaseListboxController extends BaseController {
 
 			if (selections.size() != 1
 				|| !selections.iterator().next().getClass().equals(LogSummaryType.class)) {
-			    Notification.error("Please select a log file");
+			    Notification.error(Labels.getLabel("portal_selectOneLog_message"));
 			    return;
 			}
 
@@ -439,10 +435,10 @@ public abstract class BaseListboxController extends BaseController {
 			try {
 				new ImportController(getMainController());
 			} catch (DialogException e) {
-				Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
+				Messagebox.show(e.getMessage(), "Apromore", Messagebox.OK, Messagebox.ERROR);
 			}
 	    } else {
-			Notification.error("Cannot upload in read-only folder");
+			Notification.error(Labels.getLabel("portal_noUploadInReadOnly_message"));
 	    }
 	}
 
@@ -453,7 +449,7 @@ public abstract class BaseListboxController extends BaseController {
 			downloadPlugin = portalPluginMap.get("Download");
 			downloadPlugin.execute(portalContext);
 		} catch (Exception e) {
-			Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
+			Messagebox.show(e.getMessage(), "Apromore", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
 
@@ -464,7 +460,7 @@ public abstract class BaseListboxController extends BaseController {
 			etlPlugin = portalPluginMap.get(ETL_PLUGIN_LABEL);
 			etlPlugin.execute(portalContext);
 		} catch (Exception e) {
-			Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
+			Messagebox.show(e.getMessage(), "Apromore", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
 
@@ -474,7 +470,7 @@ public abstract class BaseListboxController extends BaseController {
 		try {
 			new AddFolderController(getMainController(), currentUser, currentFolder);
 		} catch (DialogException e) {
-			Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
+			Messagebox.show(e.getMessage(), "Apromore", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
 
@@ -499,10 +495,10 @@ public abstract class BaseListboxController extends BaseController {
 				}
 				new RenameFolderController(getMainController(), folderIds.get(0), selectedFolderName);
 			} else if (folderIds.size() > 1) {
-				Notification.error("Only one item can be renamed at a time.");
+				Notification.error(Labels.getLabel("portal_noMultipleRename_message"));
 			}
 		} catch (DialogException e) {
-			Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
+			Messagebox.show(e.getMessage(), "Apromore", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
 
@@ -514,7 +510,7 @@ public abstract class BaseListboxController extends BaseController {
 			editSelectionMetadataPlugin = portalPluginMap.get("Rename");
 			editSelectionMetadataPlugin.execute(portalContext);
 		} catch (Exception e) {
-			Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
+			Messagebox.show(e.getMessage(), "Apromore", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
 
@@ -525,7 +521,7 @@ public abstract class BaseListboxController extends BaseController {
 	public void rename() throws InterruptedException {
 		try {
 			if (!isSingleFileSelected()) {
-				Notification.error("Please select single file or folder to rename");
+				Notification.error(Labels.getLabel("portal_selectOneItemRename_message"));
 				return;
 			}
 			Object selectedItem = getSelection().iterator().next();
@@ -546,17 +542,17 @@ public abstract class BaseListboxController extends BaseController {
 					renameFolder();
 				}
 			} else {
-				Notification.error("Only Owner or Editor can rename an item");
+				Notification.error(Labels.getLabel("portal_noPrivilegeRename_message"));
             }
 
 		} catch (DialogException e) {
-			Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
+			Messagebox.show(e.getMessage(), "Apromore", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
 
 	private boolean validateNotFolderTypeItem(Object selectedItem) {
 		if (selectedItem instanceof FolderType) {
-			Notification.error("You can only share a log or model");
+			Notification.error(Labels.getLabel("portal_onlyShareLogOrModel_message"));
 			return false;
         }
 		return true;
@@ -655,7 +651,7 @@ public abstract class BaseListboxController extends BaseController {
 
 	/* Show the message tailored to deleting process model. */
 	private void showMessageProcessesDelete(final MainController mainController) throws Exception {
-		Messagebox.show(PROCESS_DELETE, ALERT, Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
+		Messagebox.show(Labels.getLabel("portal_deleteModelPrompt_message"), Labels.getLabel("portal_warning_text"), Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
 				new EventListener<Event>() {
 					@Override
 					public void onEvent(Event evt) throws Exception {
@@ -674,7 +670,7 @@ public abstract class BaseListboxController extends BaseController {
 
 	/* Show the message tailored to deleting log model. */
 	private void showMessageLogsDelete(final MainController mainController) throws Exception {
-		Messagebox.show(LOG_DELETE, ALERT, Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
+		Messagebox.show(Labels.getLabel("portal_deleteLogPrompt_message"), Labels.getLabel("portal_warning_text"), Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
 				new EventListener<Event>() {
 					@Override
 					public void onEvent(Event evt) throws Exception {
@@ -693,7 +689,7 @@ public abstract class BaseListboxController extends BaseController {
 
 	/* Show a message tailored to deleting a combo of folders and processes */
 	private void showMessageElementsDelete(final MainController mainController) throws Exception {
-		Messagebox.show(MIXED_DELETE, ALERT, Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
+		Messagebox.show(Labels.getLabel("portal_deleteMixedPrompt_message"), Labels.getLabel("portal_warning_text"), Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
 				new EventListener<Event>() {
 					@Override
 					public void onEvent(Event evt) throws Exception {
@@ -713,7 +709,7 @@ public abstract class BaseListboxController extends BaseController {
 	/* Show the message tailored to deleting one or more folders. */
 	private void showMessageFolderDelete(final MainController mainController, final ArrayList<FolderType> folders)
 			throws Exception {
-		Messagebox.show(FOLDER_DELETE, ALERT, Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
+		Messagebox.show(Labels.getLabel("portal_deleteFolderPrompt_message"), Labels.getLabel("portal_warning_text"), Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
 				new EventListener<Event>() {
 					@Override
 					public void onEvent(Event evt) throws Exception {
@@ -733,7 +729,7 @@ public abstract class BaseListboxController extends BaseController {
 	/* Show a message tailored to deleting a combo of folders and processes */
 	private void showMessageFoldersAndElementsDelete(final MainController mainController,
 			final ArrayList<FolderType> folders) throws Exception {
-		Messagebox.show(MIXED_DELETE, ALERT, Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
+		Messagebox.show(Labels.getLabel("portal_deleteMixedPrompt_message"), Labels.getLabel("portal_warning_text"), Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
 				new EventListener<Event>() {
 					@Override
 					public void onEvent(Event evt) throws Exception {
@@ -759,8 +755,8 @@ public abstract class BaseListboxController extends BaseController {
 			userMgmtPlugin = portalPluginMap.get(Constants.USER_ADMIN_PLUGIN);
 			userMgmtPlugin.execute(portalContext);
 		} catch (Exception e) {
-			LOGGER.error("Unable to create user administration dialog", e);
-			Messagebox.show("Unable to create user administration dialog");
+			LOGGER.error(Labels.getLabel("portal_failedLaunchUserAdmin_message"), e);
+			Messagebox.show(Labels.getLabel("portal_failedLaunchUserAdmin_message"));
 		}
 	}
 
@@ -787,7 +783,7 @@ public abstract class BaseListboxController extends BaseController {
 			accessControlPlugin.setSimpleParams(arg);
 			accessControlPlugin.execute(portalContext);
 		} catch (Exception e) {
-			Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
+			Messagebox.show(e.getMessage(), "Apromore", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
 
@@ -801,10 +797,10 @@ public abstract class BaseListboxController extends BaseController {
 		// Check for ownership is moved to plugin level
 		try {
 			if (getSelectionCount() == 0) {
-				Notification.error("Please select a log or model to share");
+				Notification.error(Labels.getLabel("portal_selectOneLogOrModel_message"));
 				return;
 			} else if (getSelectionCount() > 1) {
-				Notification.error("You cannot share multiple items");
+				Notification.error(Labels.getLabel("portal_noMultipleShare_message"));
 				return;
 			}
 			Object selectedItem = getSelection().iterator().next();
@@ -819,7 +815,7 @@ public abstract class BaseListboxController extends BaseController {
 			accessControlPlugin.setSimpleParams(arg);
 			accessControlPlugin.execute(portalContext);
 		} catch (Exception e) {
-			Messagebox.show(e.getMessage(), "Attention", Messagebox.OK, Messagebox.ERROR);
+			Messagebox.show(e.getMessage(), "Apromore", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
 
@@ -850,8 +846,8 @@ public abstract class BaseListboxController extends BaseController {
 		calendarPlugin.execute(portalContext);
 
 	    } catch (Exception e) {
-		LOGGER.error("Unable to create custom calendar dialog", e);
-		Messagebox.show("Unable to create custom calendar dialog");
+		LOGGER.error(Labels.getLabel("portal_failedLaunchCustomCalendar_message"), e);
+		Messagebox.show(Labels.getLabel("portal_failedLaunchCustomCalendar_message"));
 	    }
 	}
 
@@ -887,7 +883,7 @@ public abstract class BaseListboxController extends BaseController {
 		if (failures > 0) {
 			Messagebox.show(
 					"Could not perform all delete operations. You may not be authorized to delete some of the resources.",
-					"Attention", Messagebox.OK, Messagebox.ERROR);
+					"Apromore", Messagebox.OK, Messagebox.ERROR);
 		}
 		mainController.reloadSummaries();
 	}

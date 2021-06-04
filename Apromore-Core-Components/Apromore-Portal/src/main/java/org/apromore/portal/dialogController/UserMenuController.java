@@ -120,19 +120,20 @@ public class UserMenuController extends SelectorComposer<Menubar> {
                     continue;
                 }
 
+                String group = plugin.getGroup(Locale.getDefault());
                 String menuName = plugin.getGroupLabel(Locale.getDefault());
                 String label = plugin.getLabel(Locale.getDefault());
 
                 // Create a new menu if this is the first menu item within it
-                if (!menuMap.containsKey(menuName)) {
+                if (!menuMap.containsKey(group)) {
                     Menu menu = new Menu(menuName);
                     menu.appendChild(new Menupopup());
-                    menuMap.put(menuName, menu);
+                    menuMap.put(group, menu);
                 }
-                assert menuMap.containsKey(menuName);
+                assert menuMap.containsKey(group);
 
                 // Create the menu item
-                Menu menu = menuMap.get(menuName);
+                Menu menu = menuMap.get(group);
                 Menuitem menuitem = new Menuitem();
                 if (plugin.getIconPath().startsWith("/")) {
                     menuitem.setImage(plugin.getIconPath());
@@ -140,8 +141,8 @@ public class UserMenuController extends SelectorComposer<Menubar> {
                 } else if (plugin.getResourceAsStream(plugin.getIconPath()) != null) {
                     try {
                         menuitem.setImage("portalPluginResource/"
-                            + URLEncoder.encode(plugin.getGroupLabel(Locale.getDefault()), "utf-8") + "/"
-                            + URLEncoder.encode(plugin.getLabel(Locale.getDefault()), "utf-8") + "/"
+                            + URLEncoder.encode(plugin.getGroup(Locale.getDefault()), "utf-8") + "/"
+                            + URLEncoder.encode(plugin.getItemCode(Locale.getDefault()), "utf-8") + "/"
                             + plugin.getIconPath());
 
                     } catch (UnsupportedEncodingException e) {
