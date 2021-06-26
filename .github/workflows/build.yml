@@ -20,14 +20,7 @@ jobs:
       - name: Setup Maven settings.xml
         uses: whelk-io/maven-settings-xml-action@v11
         with:
-          servers: |
-            '[
-              {
-                "id": "artifactory",
-                "username": "${secrets.APROMORE_DEV_USERNAME}",
-                "password": "${secrets.APROMORE_DEV_PASSWORD}"
-              }
-            ]'
+          servers: '[ {  "id": "artifactory", "username": "${secrets.APROMORE_DEV_USERNAME}", "password": "${secrets.APROMORE_DEV_PASSWORD}"}]'
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
