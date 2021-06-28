@@ -1158,9 +1158,9 @@
                 <inherited>false</inherited>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
-                <version>2.2</version>
+                <version>3.9.0.2155</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
