@@ -21,6 +21,7 @@ jobs:
         uses: whelk-io/maven-settings-xml-action@v11
         with:
           servers: '[ {  "id": "artifactory", "username": "${secrets.APROMORE_DEV_USERNAME}", "password": "${secrets.APROMORE_DEV_PASSWORD}"}]'
+          mirrors: '[{  "id": "springsource-mirror","mirrorOf": "external:http:*", "url": "http://repository.springsource.com/maven/bundles/external" }]'
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
