@@ -24,10 +24,12 @@ package org.apromore.plugin.portal.processdiscoverer.eventlisteners;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.text.MessageFormat;
 import java.util.GregorianCalendar;
 
 import javax.xml.datatype.DatatypeFactory;
 
+import org.apromore.dao.model.Log;
 import org.apromore.plugin.portal.processdiscoverer.PDAnalyst;
 import org.apromore.plugin.portal.processdiscoverer.PDController;
 import org.apromore.plugin.portal.processdiscoverer.components.AbstractController;
@@ -39,6 +41,8 @@ import org.deckfour.xes.model.XLog;
 import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
+
+import static org.apromore.commons.item.Constants.HOME_FOLDER_NAME;
 
 public class LogExportController extends AbstractController {
     private ContextData contextData;
@@ -59,7 +63,8 @@ public class LogExportController extends AbstractController {
         }
         
         InputDialog.showInputDialog(
-            Labels.getLabel("e.pd.saveLogWin.text"), // "Save filtered log",
+            // Labels.getLabel("e.pd.saveLogWin.text"), // "Save filtered log",
+            parent.getLabel("saveLogWin_text"),
             "Enter a log name (no more than 60 characters)",
             contextData.getLogName() + "_filtered",
             new EventListener<Event>() {
@@ -80,11 +85,17 @@ public class LogExportController extends AbstractController {
             final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             parent.getEvenLogService().exportToStream(outputStream, filtered_log);
 
-            parent.getEvenLogService().importLog(contextData.getUsername(), contextData.getFolderId(),
+            Log log = parent.getEvenLogService().importLog(contextData.getUsername(), contextData.getFolderId(),
                     logName, new ByteArrayInputStream(outputStream.toByteArray()), "xes.gz",
                     contextData.getDomain(), DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar()).toString(),
                     false);
-            Notification.info("A new log named <strong>" + logName + "</strong> has been saved in the <strong>" + contextData.getFolderName() + "</strong> folder.");
+            String folderName = log.getFolder() == null ? HOME_FOLDER_NAME : log.getFolder().getName();
+            String notif = MessageFormat.format(
+                parent.getLabel("successSaveLog_message"),
+                "<strong>" + logName + "</strong>",
+                "<strong>" + folderName + "</strong>"
+            );
+            Notification.info(notif);
             parent.refreshPortal();
         } catch (Exception e) {
             e.printStackTrace();

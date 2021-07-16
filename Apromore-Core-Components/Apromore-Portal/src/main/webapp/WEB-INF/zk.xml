@@ -51,7 +51,7 @@
   </library-property>
 
   <system-config>
-    <label-location>/WEB-INF/ui.properties</label-location>
+    <label-location>/WEB-INF/zk-label.properties</label-location>
     <label-location>/WEB-INF/brand.properties</label-location>
     <label-location>/WEB-INF/msg.properties</label-location>
     <web-app-class>org.apromore.portal.ApromoreWebApp</web-app-class>
@@ -408,7 +408,9 @@
             <listener-class>org.apromore.portal.LoggingZKListener</listener-class>
     </listener>
 
+
     <!-- Configure the error page
+
     <error-page>
             <exception-type>java.lang.Throwable</exception-type>
             <location>/WEB-INF/sys/error.zul</location>

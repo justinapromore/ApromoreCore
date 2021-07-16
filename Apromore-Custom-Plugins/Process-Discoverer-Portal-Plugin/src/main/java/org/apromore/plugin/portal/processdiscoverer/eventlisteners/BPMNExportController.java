@@ -23,12 +23,15 @@
 package org.apromore.plugin.portal.processdiscoverer.eventlisteners;
 
 import java.io.ByteArrayInputStream;
+import java.text.MessageFormat;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.datatype.DatatypeFactory;
 
+import org.apromore.dao.model.Folder;
+import org.apromore.dao.model.ProcessModelVersion;
 import org.apromore.plugin.portal.PortalLoggerFactory;
 import org.apromore.plugin.portal.processdiscoverer.PDController;
 import org.apromore.plugin.portal.processdiscoverer.components.AbstractController;
@@ -52,6 +55,8 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Progressmeter;
 import org.zkoss.zul.Window;
+
+import static org.apromore.commons.item.Constants.HOME_FOLDER_NAME;
 
 /**
  * This class provides a facility to export BPMN models from ProcessDiscoverer and save
@@ -118,14 +123,14 @@ public class BPMNExportController extends AbstractController {
     
                 case MINING_COMPLETE:
                 	if (fractionCompleteProgressmeter != null) fractionCompleteProgressmeter.setValue(100);
-                    if (descriptionLabel != null) descriptionLabel.setValue("Saving BPMN model");
+                    if (descriptionLabel != null) descriptionLabel.setValue(parent.getLabel("savingBPMN_message"));
                     try {
                     	BPMNExportController.this.save();
                     	if (window != null) window.detach();
                         eventQueue.unsubscribe(this); //unsubscribe after finishing work
                     } catch (Exception e) {
                         e.printStackTrace();
-                        Messagebox.show("Process mining failed (" + e.getMessage() + ")", "Attention", Messagebox.OK, Messagebox.ERROR);
+                        Messagebox.show(parent.getLabel("failedProcessMining_message"), "Apromore", Messagebox.OK, Messagebox.ERROR);
                         eventQueue.unsubscribe(this); //unsubscribe after finishing work even fails
                     }
                     break;
@@ -133,13 +138,14 @@ public class BPMNExportController extends AbstractController {
                 case MINING_EXCEPTION:
                     Exception e = (Exception) event.getData();
                     if (window != null) window.detach();
-                    Messagebox.show("Process mining failed (" + e.getMessage() + ")", "Attention", Messagebox.OK, Messagebox.ERROR);
+                    Messagebox.show(parent.getLabel("failedProcessMining_message"), "Apromore", Messagebox.OK, Messagebox.ERROR);
                     eventQueue.unsubscribe(this); //unsubscribe after finishing work even fails
                     break;
 
                 case ANNOTATION_EXCEPTION:
                     Exception e2 = (Exception) event.getData();
-                    Messagebox.show("Unable to annotate BPMN model for BIMP simulation (" + e2.getMessage() + ")\n\nModel will be created without annotations.", "Attention", Messagebox.OK, Messagebox.EXCLAMATION);
+                    e2.printStackTrace();
+                    Messagebox.show(parent.getLabel("failedAnnotateBPMN_message"), "Apromore", Messagebox.OK, Messagebox.EXCLAMATION);
                     eventQueue.unsubscribe(this); //unsubscribe after finishing work even fails
                     break;
                 }
@@ -248,23 +254,22 @@ public class BPMNExportController extends AbstractController {
         if (parent.getContextData().getLogName() != null) {
             defaultProcessName = parent.getContextData().getLogName().split("\\.")[0];
         }
-        
         InputDialog.showInputDialog(
-			"Save BPMN model",
-			"Enter a name for the BPMN model (no more than 60 characters)",
+            parent.getLabel("saveBPMN_message"),
+            parent.getLabel("saveBPMNName_message"),
 			defaultProcessName,
 			new EventListener<Event>() {
 				@Override
             	public void onEvent(Event event) throws Exception {
 					if (event.getName().equals("onOK")) {
-    				   String modelName = (String)event.getData();
-				       String user = controller.getContextData().getUsername();
+    				    String modelName = (String)event.getData();
+				        String user = controller.getContextData().getUsername();
 				        Version version = new Version(1, 0);
 				        String now = DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar()).toString();
 				        boolean publicModel = false;
 
 				        try {
-    				        controller.getProcessService().importProcess(user,
+                            ProcessModelVersion pmv = controller.getProcessService().importProcess(user,
     				        		controller.getContextData().getFolderId(),
     				        		modelName,
     				                version,
@@ -275,18 +280,27 @@ public class BPMNExportController extends AbstractController {
     				                now,  // creation timestamp
     				                now,  // last update timestamp
     				                publicModel);
-                            Notification.info("A new BPMN model named <strong>" + modelName + "</strong> has been saved in the <strong>" + controller.getContextData().getFolderName() + "</strong> folder.");
+                            Folder folder = controller.getProcessService().getFolderByPmv(pmv);
+                            String folderName = folder == null ? HOME_FOLDER_NAME : folder.getName();
+                            String notif = MessageFormat.format(
+                                parent.getLabel("successSaveBPMN_message"),
+                                "<strong>" + modelName + "</strong>",
+                                "<strong>" + folderName + "</strong>"
+                            );
+                            Notification.info(notif);
     				        controller.refreshPortal();
 				        }
 				        catch (Exception ex) {
-				            Messagebox.show("Error in saving model: " + ex.getMessage());
+				            Messagebox.show(
+                                parent.getLabel("failedSaveModel_message")
+                            );
 				            LOGGER.error("Error in saving model: ", ex);
 				        }
 					}
             	}
 			});
 
- 
+
     };
 
 }

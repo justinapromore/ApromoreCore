@@ -50,6 +50,7 @@ import org.apromore.service.UserService;
 import org.apromore.service.helper.UserInterfaceHelper;
 import org.apromore.service.search.SearchExpressionBuilder;
 import org.slf4j.Logger;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.InputEvent;
@@ -59,6 +60,7 @@ import org.zkoss.zul.*;
 
 public class SimpleSearchController {
     private static final Logger LOGGER = PortalLoggerFactory.getLogger(SimpleSearchController.class);
+    public static final String ON_CLICK = "onClick";
 
     private MainController mainC;
     private Combobox previousSearchesCB;
@@ -76,19 +78,19 @@ public class SimpleSearchController {
         refreshSearch("");
         setVisibility(clearSearchBtn, false);
 
-        doSearchBtn.addEventListener("onClick", new EventListener<Event>() {
+        doSearchBtn.addEventListener(ON_CLICK, new EventListener<Event>() {
             public void onEvent(Event event) throws Exception {
                 processSearch();
             }
         });
-        clearSearchBtn.addEventListener("onClick", new EventListener<Event>() {
+        clearSearchBtn.addEventListener(ON_CLICK, new EventListener<Event>() {
             public void onEvent(Event event) throws Exception {
                 clearSearches();
                 mainC.reloadSummaries();
                 setVisibility(clearSearchBtn, false);
             }
         });
-        simpleSearchesBu.addEventListener("onClick", new EventListener<Event>() {
+        simpleSearchesBu.addEventListener(ON_CLICK, new EventListener<Event>() {
             public void onEvent(Event event) throws Exception {
                 processSearch();
             }
@@ -176,7 +178,7 @@ public class SimpleSearchController {
         UserService userService = (UserService) SpringUtil.getBean("userService");
         if (securityService == null || userService == null) {
             LOGGER.error("SecurityService and/or UserService are null");
-            Messagebox.show("Some internal services are not available",
+            Messagebox.show(Labels.getLabel("portal_servicesUnavailable_message"),
                 "Error",
                 Messagebox.OK, Messagebox.ERROR);
             return;
@@ -199,7 +201,7 @@ public class SimpleSearchController {
             userService.updateUserSearchHistory(currentUser, searchHistories);
         } catch (Exception e) {
             LOGGER.error("Failed search", e);
-            Messagebox.show("Search is not available",
+            Messagebox.show(Labels.getLabel("portal_seachUnavailable_message"),
                 "Error",
                 Messagebox.OK, Messagebox.ERROR);
         }

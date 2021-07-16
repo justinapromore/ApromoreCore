@@ -26,18 +26,9 @@
 package org.apromore.portal.dialogController;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -51,6 +42,8 @@ import org.apromore.plugin.portal.MainControllerInterface;
 import org.apromore.plugin.portal.PortalContext;
 import org.apromore.plugin.portal.PortalLoggerFactory;
 import org.apromore.plugin.portal.PortalPlugin;
+import org.apromore.portal.OSGi;
+import org.apromore.portal.common.i18n.I18nSession;
 import org.apromore.portal.context.PortalPluginResolver;
 import org.apromore.plugin.portal.SessionTab;
 import org.apromore.plugin.property.RequestParameterType;
@@ -80,7 +73,13 @@ import org.apromore.portal.model.UserType;
 import org.apromore.portal.model.UsernamesType;
 import org.apromore.portal.model.VersionSummaryType;
 import org.apromore.portal.security.helper.JwtHelper;
+import org.apromore.portal.util.ExplicitComparator;
 import org.slf4j.Logger;
+import org.zkoss.spring.SpringUtil;
+import org.zkoss.web.Attributes;
+import org.zkoss.zk.ui.util.Clients;
+import org.zkoss.util.Locales;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
@@ -89,18 +88,12 @@ import org.zkoss.zk.ui.event.EventQueue;
 import org.zkoss.zk.ui.event.EventQueues;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.Clients;
-import org.zkoss.zul.Button;
-import org.zkoss.zul.Hbox;
-import org.zkoss.zul.Html;
-import org.zkoss.zul.Label;
-import org.zkoss.zul.Messagebox;
-import org.zkoss.zul.Tab;
-import org.zkoss.zul.Tabbox;
-import org.zkoss.zul.Textbox;
-import org.zkoss.zul.Window;
+import org.zkoss.zul.*;
 import org.zkoss.zul.ext.Paginal;
 
 import javax.servlet.http.HttpServletRequest;
+import org.apromore.portal.common.i18n.I18nConfig;
+import org.apromore.portal.common.i18n.I18nSession;
 
 import static org.apromore.portal.common.UserSessionManager.initializeUser;
 
@@ -111,6 +104,8 @@ import static org.apromore.portal.common.UserSessionManager.initializeUser;
 public class MainController extends BaseController implements MainControllerInterface {
 
     private static final long serialVersionUID = 5147685906484044300L;
+    public static final String APROMORE = "Apromore";
+    public static final String ON_CLICK = "onClick";
 
     private static MainController controller = null;
     private static final Logger LOGGER = PortalLoggerFactory.getLogger(MainController.class);
@@ -141,6 +136,8 @@ public class MainController extends BaseController implements MainControllerInte
     private PortalPlugin logVisualizerPlugin = null;
     public PortalSession portalSession;
     private Map<String, PortalPlugin> portalPluginMap;
+    private I18nSession i18nSession;
+    private LangChooserController langChooserController;
 
     public static MainController getController() {
         return controller;
@@ -156,7 +153,17 @@ public class MainController extends BaseController implements MainControllerInte
         initializeUser(getService(), config, null, null);
 
         portalPluginMap = PortalPluginResolver.getPortalPluginMap();
+        setupLocale();
     }
+
+    private void setupLocale() {
+        I18nConfig config = (I18nConfig) SpringUtil.getBean("i18nConfig");
+        i18nSession = new I18nSession(config);
+        UserSessionManager.setCurrentI18nSession(i18nSession);
+        i18nSession.applyLocaleFromClient();
+    }
+
+    public I18nSession getI18nSession() { return i18nSession; }
 
     private void setupUserDynamically(final UserType userType) {
 	    LOGGER.debug("DYNAMICALLY Setting*** userType {} as currentUser", userType);
@@ -201,6 +208,15 @@ public class MainController extends BaseController implements MainControllerInte
             this.simplesearch = new SimpleSearchController(this);
             this.portalContext = new PluginPortalContext(this);
             this.navigation = new NavigationController(this);
+
+            Combobox langChooser = (Combobox) mainW.getFellow("langChooser");
+            if (i18nSession.getConfig().isEnabled()) {
+                langChooserController = new LangChooserController(langChooser, this);
+                langChooserController.populate();
+                langChooser.setVisible(true);
+            } else {
+                langChooser.setVisible(false);
+            }
 
             controller = this;
             MainController self = this;
@@ -261,7 +277,7 @@ public class MainController extends BaseController implements MainControllerInte
                 message = e.getMessage();
             }
             e.printStackTrace();
-            Messagebox.show("Repository not available (" + message + ")",
+            Messagebox.show(Labels.getLabel("portal_repoUnvailable_message"),
                     "Attention",
                     Messagebox.OK, Messagebox.ERROR);
         }
@@ -444,7 +460,7 @@ public class MainController extends BaseController implements MainControllerInte
             displayMessage(message);
         } catch (Exception e) {
             LOGGER.warn("Unable to delete elements", e);
-            Messagebox.show("Deletion failed. You are not the owner of this file", "Attention", Messagebox.OK, Messagebox.ERROR);
+            Messagebox.show(Labels.getLabel("portal_failedDeleteNonOwner_message"), APROMORE, Messagebox.OK, Messagebox.ERROR);
         }
     }
 
@@ -532,7 +548,8 @@ public class MainController extends BaseController implements MainControllerInte
 
             Clients.evalJavaScript(instruction);
         } catch (Exception e) {
-            Messagebox.show("Cannot edit " + process.getName() + " (" + e.getMessage() + ")", "Attention", Messagebox.OK, Messagebox.ERROR);
+            LOGGER.error("Cannot edit", e.getMessage() );
+            Messagebox.show(MessageFormat.format(Labels.getLabel("portal_cannotEdit_message"), process.getName()), APROMORE, Messagebox.OK, Messagebox.ERROR);
         }
     }
     
@@ -556,7 +573,7 @@ public class MainController extends BaseController implements MainControllerInte
             Clients.evalJavaScript(instruction);
         } catch (Exception e) {
             LOGGER.warn("Unable to edit process model " + process.getName() + " version " + version.getVersionNumber(), e);
-            Messagebox.show("Cannot edit " + process.getName() + " (" + e.getMessage() + ")", "Attention", Messagebox.OK, Messagebox.ERROR);
+            Messagebox.show(MessageFormat.format(Labels.getLabel("portal_cannotEdit_message"), process.getName()), APROMORE, Messagebox.OK, Messagebox.ERROR);
         }
     }
     
@@ -734,7 +751,7 @@ public class MainController extends BaseController implements MainControllerInte
                 }
             }
             if (sb.length() > 0) {
-                Messagebox.show(sb.toString(), "Plugin Warnings", Messagebox.OK, Messagebox.EXCLAMATION);
+                Messagebox.show(sb.toString(), "Apromore Plugin", Messagebox.OK, Messagebox.EXCLAMATION);
             }
         }
     }
@@ -930,7 +947,7 @@ public class MainController extends BaseController implements MainControllerInte
 
     	dialog.doModal();
 
-    	((Button)dialog.getFellow("btnCancel")).addEventListener("onClick", new EventListener<Event>() {
+    	((Button)dialog.getFellow("btnCancel")).addEventListener(ON_CLICK, new EventListener<Event>() {
     		@Override
     		public void onEvent(Event event) throws Exception {
     			dialog.detach();
@@ -938,7 +955,7 @@ public class MainController extends BaseController implements MainControllerInte
     		}
     	});
 
-    	((Button)dialog.getFellow("btnOK")).addEventListener("onClick", new EventListener<Event>() {
+    	((Button)dialog.getFellow("btnOK")).addEventListener(ON_CLICK, new EventListener<Event>() {
     		@Override
     		public void onEvent(Event event) throws Exception {
     			if (txtValue.getValue().trim().isEmpty()) {
@@ -957,7 +974,7 @@ public class MainController extends BaseController implements MainControllerInte
         win.addEventListener("onOK", new EventListener<Event>() {
             @Override
             public void onEvent(Event event) throws Exception {
-                Events.sendEvent("onClick", dialog.getFellow("btnOK"), null);
+                Events.sendEvent(ON_CLICK, dialog.getFellow("btnOK"), null);
             }
         });
 

@@ -32,6 +32,7 @@ import java.io.InputStreamReader;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -45,6 +46,7 @@ import org.apromore.service.UserService;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.zkoss.spring.SpringUtil;
+import org.zkoss.web.Attributes;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.HtmlBasedComponent;
@@ -70,6 +72,11 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class BaseController extends Window {
 
+    public static final String XPDL_2_2 = "XPDL 2.2";
+    public static final String BPMN_2_0 = "BPMN 2.0";
+    public static final String PNML_1_3_2 = "PNML 1.3.2";
+    public static final String YAWL_2_2 = "YAWL 2.2";
+    public static final String EPML_2_0 = "EPML 2.0";
     private ManagerService managerService;
     private EventLogService eventLogService;
     private UserService userService;
@@ -155,6 +162,7 @@ public class BaseController extends Window {
      * @throws IllegalArgumentException if no resource can be read from <var>zulPath</var>
      */
     protected <T extends Component> T createComponent(String zulPath) {
+
         try {
             InputStream in = getClass().getClassLoader().getResourceAsStream(zulPath);
 
@@ -168,19 +176,19 @@ public class BaseController extends Window {
     protected String getURL(final String nativeType) {
         String url = "";
         switch (nativeType) {
-            case "XPDL 2.2":
+            case XPDL_2_2:
                 url = "http://b3mn.org/stencilset/bpmn2.0#";
                 break;
-            case "BPMN 2.0":
+            case BPMN_2_0:
                 url = "http://b3mn.org/stencilset/bpmn2.0#";
                 break;
-            case "PNML 1.3.2":
+            case PNML_1_3_2:
                 url = "http://b3mn.org/stencilset/petrinet#";
                 break;
-            case "YAWL 2.2":
+            case YAWL_2_2:
                 url = "http://b3mn.org/stencilset/yawl2.2#";
                 break;
-            case "EPML 2.0":
+            case EPML_2_0:
                 url = "http://b3mn.org/stencilset/epc#";
                 break;
         }
@@ -191,19 +199,19 @@ public class BaseController extends Window {
     protected String getImportPath(final String nativeType) {
         String importPath = "";
         switch (nativeType) {
-            case "XPDL 2.2":
+            case XPDL_2_2:
                 importPath = "/" + config.getSiteEditor() + "/editor/xpdlimport";
                 break;
-            case "BPMN 2.0":
+            case BPMN_2_0:
                 importPath = "/" + config.getSiteEditor() + "/editor/bpmnimport";
                 break;
-            case "PNML 1.3.2":
+            case PNML_1_3_2:
                 importPath = "/" + config.getSiteEditor() + "/editor/pnmlimport";
                 break;
-            case "YAWL 2.2":
+            case YAWL_2_2:
                 importPath = "/" + config.getSiteEditor() + "/editor/yawlimport";
                 break;
-            case "EPML 2.0":
+            case EPML_2_0:
                 importPath = "/" + config.getSiteEditor() + "/editor/epmlimport";
                 break;
         }
@@ -213,19 +221,19 @@ public class BaseController extends Window {
     protected String getExportPath(final String nativeType) {
         String exportPath = "";
         switch (nativeType) {
-            case "XPDL 2.2":
+            case XPDL_2_2:
                 exportPath = "/" + config.getSiteEditor() + "/editor/xpdlexport";
                 break;
-            case "BPMN 2.0":
+            case BPMN_2_0:
                 exportPath = "/" + config.getSiteEditor() + "/editor/bpmnexport";
                 break;
-            case "PNML 1.3.2":
+            case PNML_1_3_2:
                 exportPath = "/" + config.getSiteEditor() + "/editor/pnmlexport";
                 break;
-            case "YAWL 2.2":
+            case YAWL_2_2:
                 exportPath = "/" + config.getSiteEditor() + "/editor/yawlexport";
                 break;
-            case "EPML 2.0":
+            case EPML_2_0:
                 exportPath = "/" + config.getSiteEditor() + "/editor/epmlexport";
                 break;
         }

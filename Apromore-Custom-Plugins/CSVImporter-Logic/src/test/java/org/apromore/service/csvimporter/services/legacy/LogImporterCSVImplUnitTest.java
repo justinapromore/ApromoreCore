@@ -298,8 +298,8 @@ public class LogImporterCSVImplUnitTest {
 
         // Validate result
         assertNotNull(logModel);
-        assertEquals(3, logModel.getRowsCount());
-        assertEquals(1, logModel.getLogErrorReport().size());
+        assertEquals(4, logModel.getRowsCount());
+        assertEquals(0, logModel.getLogErrorReport().size());
         assertNotNull(xlog);
         assertEquals(
                 utilities.removeTimezone(expectedXES),
@@ -391,7 +391,6 @@ public class LogImporterCSVImplUnitTest {
      * Test {@link LogImporterCSVImpl} against an invalid CSV log <code>test7-record-invalid.csv</code>.
      */
     @Test
-    @Ignore
     public void testPrepareXesModel_test7_record_invalid() throws Exception {
 
         LOGGER.info("\n************************************\ntest7 - Record invalid");
@@ -424,8 +423,8 @@ public class LogImporterCSVImplUnitTest {
 
         // Validate result
         assertNotNull(logModel);
-        assertEquals(1, logModel.getRowsCount());
-        assertEquals(2, logModel.getLogErrorReport().size());
+        assertEquals(2, logModel.getRowsCount());
+        assertEquals(1, logModel.getLogErrorReport().size());
         assertNotNull(xlog);
         assertEquals(
                 utilities.removeTimezone(expectedXES),
@@ -458,8 +457,8 @@ public class LogImporterCSVImplUnitTest {
 
         // Validate result
         assertNotNull(logModel);
-        assertEquals(0, logModel.getRowsCount());
-        assertEquals(3, logModel.getLogErrorReport().size());
+        assertEquals(1, logModel.getRowsCount());
+        assertEquals(2, logModel.getLogErrorReport().size());
     }
 
 
